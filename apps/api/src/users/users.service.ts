@@ -1,34 +1,43 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../generated/prisma/prisma.service.js';
 import { CreateUserDto } from './dto/create-user.dto.js';
-
+const publicUser = {
+  id: true,
+  email: true,
+  firstName: true,
+  lastName: true,
+  createdAt: true,
+  updatedAt: true,
+} as const;
 @Injectable()
 export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
-
-  async create(createUserDto: CreateUserDto) {
-    const existingUser = await this.prisma.user.findUnique({
-      where: { email: createUserDto.email },
-    });
-
-    if (existingUser) {
-      throw new ConflictException('A user with this email already exists');
-    }
-
+  async create(dto: CreateUserDto, passwordHash: string) {
     return this.prisma.user.create({
-      data: createUserDto,
+      data: {
+        email: dto.email,
+        firstName: dto.firstName,
+        lastName: dto.lastName,
+        passwordHash,
+      },
+      select: publicUser,
     });
+  }
+  async findPublic(id: number) {
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+      select: publicUser,
+    });
+    if (!user) throw new NotFoundException('User not found');
+    return user;
   }
 
   async findOne(id: number) {
     const user = await this.prisma.user.findUnique({
       where: { id },
+      select: { ...publicUser, accounts: true },
     });
-
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-
+    if (!user) throw new NotFoundException('User not found');
     return user;
   }
 }

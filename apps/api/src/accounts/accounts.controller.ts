@@ -5,30 +5,34 @@ import {
   Param,
   ParseIntPipe,
   Post,
-  Query,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
-
+import type { AuthenticatedRequest } from '../auth/auth.guard.js';
+import { AuthGuard } from '../auth/auth.guard.js';
 import { AccountsService } from './accounts.service.js';
 import { CreateAccountDto } from './dto/create-account.dto.js';
 
 @Controller('accounts')
+@UseGuards(AuthGuard)
 export class AccountsController {
   constructor(private readonly accountsService: AccountsService) {}
 
   @Post()
-  create(@Body() createAccountDto: CreateAccountDto) {
-    return this.accountsService.create(createAccountDto);
+  create(@Req() request: AuthenticatedRequest, @Body() dto: CreateAccountDto) {
+    return this.accountsService.create(request.user!.sub, dto);
   }
 
   @Get()
-  findAll(
-    @Query('userId', new ParseIntPipe({ optional: true })) userId?: number,
-  ) {
-    return this.accountsService.findAll(userId);
+  findAll(@Req() request: AuthenticatedRequest) {
+    return this.accountsService.findAll(request.user!.sub);
   }
 
   @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.accountsService.findOne(id);
+  findOne(
+    @Req() request: AuthenticatedRequest,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    return this.accountsService.findOne(request.user!.sub, id);
   }
 }

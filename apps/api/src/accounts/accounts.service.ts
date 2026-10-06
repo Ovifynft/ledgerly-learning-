@@ -6,50 +6,33 @@ import { CreateAccountDto } from './dto/create-account.dto.js';
 export class AccountsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(createAccountDto: CreateAccountDto) {
+  async create(userId: number, dto: CreateAccountDto) {
     const user = await this.prisma.user.findUnique({
-      where: {
-        id: createAccountDto.userId,
-      },
+      where: { id: userId },
+      select: { id: true },
     });
-
-    if (!user) {
-      throw new NotFoundException(
-        `User with ID ${createAccountDto.userId} not found`,
-      );
-    }
-
+    if (!user) throw new NotFoundException('Authenticated user not found');
     return this.prisma.account.create({
       data: {
-        userId: createAccountDto.userId,
-        name: createAccountDto.name,
-        type: createAccountDto.type,
-        currency: createAccountDto.currency,
+        userId,
+        name: dto.name,
+        type: dto.type,
+        currency: dto.currency,
         balance: 0,
       },
     });
   }
 
-  async findAll(userId?: number) {
-    return this.prisma.account.findMany({
-      where: userId !== undefined ? { userId } : undefined,
-    });
+  findAll(userId: number) {
+    return this.prisma.account.findMany({ where: { userId } });
   }
 
-  async findOne(id: number) {
-    const account = await this.prisma.account.findUnique({
-      where: {
-        id,
-      },
-      include: {
-        user: true,
-      },
+  async findOne(userId: number, id: number) {
+    const account = await this.prisma.account.findFirst({
+      where: { id, userId },
+      include: { user: true },
     });
-
-    if (!account) {
-      throw new NotFoundException(`Account with ID ${id} not found`);
-    }
-
+    if (!account) throw new NotFoundException('Account not found');
     return account;
   }
 }
