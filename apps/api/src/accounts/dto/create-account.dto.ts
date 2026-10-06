@@ -1,16 +1,8 @@
-import {
-  IsInt,
-  IsNotEmpty,
-  IsNumber,
-  IsString,
-} from 'class-validator';
+import { IsInt, IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateAccountDto {
   @IsInt()
   userId: number;
-
-  @IsNumber()
-  balance: number;
 
   @IsString()
   @IsNotEmpty()

@@ -8,7 +8,7 @@ import {
   Query,
 } from '@nestjs/common';
 
-import { AccountsService } from './acccounts.service.js';
+import { AccountsService } from './accounts.service.js';
 import { CreateAccountDto } from './dto/create-account.dto.js';
 
 @Controller('accounts')
@@ -21,10 +21,10 @@ export class AccountsController {
   }
 
   @Get()
-  findAll(@Query('userId') userId?: string) {
-    return this.accountsService.findAll(
-      userId !== undefined ? Number(userId) : undefined,
-    );
+  findAll(
+    @Query('userId', new ParseIntPipe({ optional: true })) userId?: number,
+  ) {
+    return this.accountsService.findAll(userId);
   }
 
   @Get(':id')

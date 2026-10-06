@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { createObserveModule } from '@nestjs/observe';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
+import { AccountsModule } from './accounts/accounts.module.js';
 import { PrismaService } from './generated/prisma/prisma.service.js';
 import { UsersModule } from './users/users.module.js';
 
@@ -11,7 +12,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
 @Module({
   imports: [
     // Distributed tracing, auto-correlated logs, request/job metrics, error
-    // telemetry, alarms, and more — out of the box. Sign up at https://observe.nestjs.com
+    // telemetry, alarms, and more â€” out of the box. Sign up at https://observe.nestjs.com
     ConfigModule.forRoot({ isGlobal: true }),
     ObserveModule.forRoot({
       appKey: 'YOUR_APP_KEY',
@@ -19,6 +20,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
       serviceId: 'api',
     }),
     UsersModule,
+    AccountsModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],
