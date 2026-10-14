@@ -12,6 +12,7 @@ import type { AuthenticatedRequest } from '../auth/auth.guard.js';
 import { AuthGuard } from '../auth/auth.guard.js';
 import { AccountsService } from './accounts.service.js';
 import { CreateAccountDto } from './dto/create-account.dto.js';
+import { DepositDto } from './dto/deposit.dto.js';
 
 @Controller('accounts')
 @UseGuards(AuthGuard)
@@ -35,4 +36,16 @@ export class AccountsController {
   ) {
     return this.accountsService.findOne(request.user!.sub, id);
   }
+
+  @Post(':id/deposits')
+  deposit(
+    @Req() request: AuthenticatedRequest,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: DepositDto,
+  ) {
+
+    console.log(dto, id)
+    return this.accountsService.deposit(request.user!.sub, id, dto);
+  }
 }
+

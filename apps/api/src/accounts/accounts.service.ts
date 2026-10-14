@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../generated/prisma/prisma.service.js';
 import { CreateAccountDto } from './dto/create-account.dto.js';
+import { DepositDto } from './dto/deposit.dto.js';
 
 @Injectable()
 export class AccountsService {
@@ -34,5 +35,28 @@ export class AccountsService {
     });
     if (!account) throw new NotFoundException('Account not found');
     return account;
+  }
+
+  async deposit(userId: number, id: number, dto: DepositDto) {
+    const account = await this.prisma.account.findFirst({
+      where: { id, userId },
+    });
+
+    if (!account) throw new NotFoundException('Account not found');
+
+    return this.prisma.$transaction(async (tx) => {
+      await tx.account.update({
+        where: { id },
+        data: { balance: { increment: dto.amount } },
+      });
+
+      return tx.transaction.create({
+        data: {
+          amount: dto.amount,
+          type: 'DEPOSIT',
+          accountId: id,
+        },
+      });
+    });
   }
 }

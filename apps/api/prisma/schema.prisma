@@ -43,4 +43,20 @@ model Account{
   user User @relation(fields: [userId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  transactions Transaction[]
+}
+
+enum TransactionType{
+  DEPOSIT
+  WITHDRAWAL
+}
+
+
+model Transaction {
+  id        Int             @id @default(autoincrement())
+  amount    Decimal
+  type      TransactionType
+  accountId Int
+  account   Account         @relation(fields: [accountId], references: [id])
+  createdAt DateTime        @default(now())
 }
